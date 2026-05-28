@@ -1,0 +1,31 @@
+# ═══════════════════════════════════════════════════════
+# HezCast Engine — GPU Override
+# Tinlance Limited | Apache 2.0
+#
+# Usage:
+#   docker-compose -f docker-compose.yml -f docker-compose.gpu.yml up
+#
+# Requirements: NVIDIA GPU + nvidia-container-toolkit installed
+# ═══════════════════════════════════════════════════════
+
+services:
+
+  avatar-worker:
+    environment:
+      - AVATAR_MODE=gpu
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  ollama:
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

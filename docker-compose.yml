@@ -1,0 +1,218 @@
+# ═══════════════════════════════════════════════════════
+# HezCast Engine — Docker Compose (CPU mode)
+# Tinlance Limited | Apache 2.0
+#
+# Usage:
+#   docker-compose up           → CPU mode (works anywhere)
+#   docker-compose -f docker-compose.yml \
+#     -f docker-compose.gpu.yml up  → GPU mode (avatar engine)
+# ═══════════════════════════════════════════════════════
+
+services:
+
+  # ─────────────────────────────────────────
+  # API SERVER
+  # ─────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: hezcast-api
+    ports:
+      - "8503:8503"   # Port 8503 — free alongside trading bot (8502)
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=postgresql+asyncpg://hezcast:${DB_PASSWORD}@db:5432/hezcast
+      - CLAUDE_API_KEY=${CLAUDE_API_KEY}
+      - ANTHROPIC_API_KEY=${CLAUDE_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - PEXELS_API_KEY=${PEXELS_API_KEY}
+      - OLLAMA_URL=${OLLAMA_URL:-http://ollama:11434}
+      - STORAGE_PATH=/app/storage
+      - SENTRY_DSN=${SENTRY_DSN:-}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+    volumes:
+      - ./storage:/app/storage
+      - ./config:/app/config:ro
+      - ./models:/app/models:ro
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8503/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ─────────────────────────────────────────
+  # MAIN CELERY WORKER (script + voice + compose)
+  # ─────────────────────────────────────────
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    container_name: hezcast-worker
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=postgresql+asyncpg://hezcast:${DB_PASSWORD}@db:5432/hezcast
+      - CLAUDE_API_KEY=${CLAUDE_API_KEY}
+      - ANTHROPIC_API_KEY=${CLAUDE_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - PEXELS_API_KEY=${PEXELS_API_KEY}
+      - OLLAMA_URL=${OLLAMA_URL:-http://ollama:11434}
+      - STORAGE_PATH=/app/storage
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    volumes:
+      - ./storage:/app/storage
+      - ./config:/app/config:ro
+      - ./models:/app/models
+    depends_on:
+      - redis
+      - db
+    restart: unless-stopped
+    command: celery -A workers.celery_app worker
+             --queues=default,script,voice,compose
+             --concurrency=2
+             --loglevel=info
+
+  # ─────────────────────────────────────────
+  # AVATAR WORKER (MuseTalk — CPU fallback mode)
+  # Override with docker-compose.gpu.yml for GPU
+  # ─────────────────────────────────────────
+  avatar-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.avatar
+    container_name: hezcast-avatar
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=postgresql+asyncpg://hezcast:${DB_PASSWORD}@db:5432/hezcast
+      - STORAGE_PATH=/app/storage
+      - AVATAR_MODE=cpu           # Override to 'gpu' in docker-compose.gpu.yml
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    volumes:
+      - ./storage:/app/storage
+      - ./models:/app/models
+    depends_on:
+      - redis
+    restart: unless-stopped
+    command: celery -A workers.celery_app worker
+             --queues=avatar
+             --concurrency=1
+             --loglevel=info
+
+  # ─────────────────────────────────────────
+  # OLLAMA (local LLM fallback)
+  # ─────────────────────────────────────────
+  ollama:
+    image: ollama/ollama:latest
+    container_name: hezcast-ollama
+    volumes:
+      - ollama_data:/root/.ollama
+    ports:
+      - "11434:11434"
+    restart: unless-stopped
+    # Pull model on first start
+    entrypoint: >
+      sh -c "ollama serve &
+             sleep 5 &&
+             ollama pull llama3 &&
+             wait"
+
+  # ─────────────────────────────────────────
+  # REDIS (task queue + job state)
+  # ─────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: hezcast-redis
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6380:6379"   # Exposed on 6380 to avoid conflicts
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─────────────────────────────────────────
+  # POSTGRESQL + PGVECTOR
+  # ─────────────────────────────────────────
+  db:
+    image: pgvector/pgvector:pg16
+    container_name: hezcast-db
+    environment:
+      POSTGRES_DB: hezcast
+      POSTGRES_USER: hezcast
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+      - ./database/schemas.sql:/docker-entrypoint-initdb.d/01_schema.sql:ro
+    ports:
+      - "5433:5432"   # Exposed on 5433 to avoid conflicts
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hezcast -d hezcast"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─────────────────────────────────────────
+  # FLOWER (Celery monitoring — dev only)
+  # ─────────────────────────────────────────
+  flower:
+    image: mher/flower:latest
+    container_name: hezcast-flower
+    environment:
+      - CELERY_BROKER_URL=redis://redis:6379/0
+    ports:
+      - "5556:5555"
+    depends_on:
+      - redis
+    profiles:
+      - dev    # Only starts with: docker-compose --profile dev up
+
+# ─────────────────────────────────────────
+# VOLUMES
+# ─────────────────────────────────────────
+volumes:
+  db_data:
+    driver: local
+  redis_data:
+    driver: local
+  ollama_data:
+    driver: local
+
+# ─────────────────────────────────────────
+# NETWORKS
+# ─────────────────────────────────────────
+  hezcast-beat:
+    container_name: hezcast-beat
+    build: .
+    command: celery -A workers.celery_app beat --loglevel=info --schedule=/tmp/celerybeat-schedule
+    environment:
+      - REDIS_URL=redis://hezcast-redis:6379/0
+      - DATABASE_URL=${DATABASE_URL}
+      - B2_KEY_ID=${B2_KEY_ID}
+      - B2_APP_KEY=${B2_APP_KEY}
+      - B2_BUCKET_NAME=${B2_BUCKET_NAME}
+      - B2_BACKUP_BUCKET=${B2_BACKUP_BUCKET:-hezcast-backups}
+      - DB_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - ./storage:/app/storage
+    depends_on:
+      - hezcast-redis
+    restart: unless-stopped
+    networks:
+      - hezcast-network
+
+networks:
+  default:
+    name: hezcast-network
+    driver: bridge

@@ -1,0 +1,134 @@
+{
+  "GiftMode": {
+    "tone": "emotional",
+    "style": "ugc_authentic",
+    "audience": "consumers_25_40",
+    "persona_name": "Maya",
+    "persona_photo": "config/personas/giftmode_persona.jpg",
+    "voice_model": "config/voices/giftmode.onnx",
+    "voice_speed": 1.05,
+    "subtitle_color": "#FF6B9D",
+    "subtitle_style": "bold_centered_word_level",
+    "hook_variants": 5,
+    "video_duration_target": 25,
+    "cta": "Download GiftMode free \u2192",
+    "brand_colors": [
+      "#FF6B9D",
+      "#FFE4F0"
+    ],
+    "clip_emotion_tags": [
+      "happy",
+      "surprise",
+      "gift",
+      "family",
+      "celebration"
+    ],
+    "script_style_notes": "Conversational, relatable, first-person storytelling. Use 'I' and 'you'. Short punchy sentences. Emotional payoff before CTA.",
+    "hook_patterns": [
+      "POV: ...",
+      "Nobody told me ...",
+      "I had X hours to ...",
+      "She said it was fine. It was not fine.",
+      "The [pain] is real."
+    ]
+  },
+  "Tinlance": {
+    "tone": "authority",
+    "style": "thought_leadership",
+    "audience": "business_owners_founders",
+    "persona_name": "Lloyd",
+    "persona_photo": "config/personas/tinlance_persona.jpg",
+    "voice_model": "config/voices/tinlance.onnx",
+    "voice_speed": 0.97,
+    "subtitle_color": "#00D4FF",
+    "subtitle_style": "bold_centered_word_level",
+    "hook_variants": 3,
+    "video_duration_target": 30,
+    "cta": "Book a consultation \u2192 tinlance.com",
+    "brand_colors": [
+      "#00D4FF",
+      "#0A0E1A"
+    ],
+    "clip_emotion_tags": [
+      "technology",
+      "security",
+      "professional",
+      "data",
+      "cyber"
+    ],
+    "script_style_notes": "Authoritative but direct. Lead with a consequence the audience fears. Use specific numbers and real scenarios. No fluff. End with a clear next step.",
+    "hook_patterns": [
+      "Your [asset] was compromised. You found out [delayed timeframe] later.",
+      "Most [audience] think they're too small to be [threat]. They're wrong.",
+      "I watched a client lose $[amount] in one [timeframe] breach.",
+      "This is what a [attack type] looks like from the inside.",
+      "[Number] businesses in [region] got hit last [period]. Were you one of them?"
+    ]
+  },
+  "WebTemify": {
+    "tone": "developer_energy",
+    "style": "product_demo",
+    "audience": "founders_developers",
+    "persona_name": "Dev",
+    "persona_photo": "config/personas/webtemify_persona.jpg",
+    "voice_model": "config/voices/webtemify.onnx",
+    "voice_speed": 1.1,
+    "subtitle_color": "#7C3AED",
+    "subtitle_style": "bold_centered_word_level",
+    "hook_variants": 4,
+    "video_duration_target": 22,
+    "cta": "Get the template \u2192 webtemify.com",
+    "brand_colors": [
+      "#7C3AED",
+      "#F5F3FF"
+    ],
+    "clip_emotion_tags": [
+      "coding",
+      "laptop",
+      "startup",
+      "website",
+      "fast"
+    ],
+    "script_style_notes": "Fast, technical but accessible. Show before you tell. Emphasis on speed, results, and no-fluff efficiency. Founders and developers respect brevity and specificity.",
+    "hook_patterns": [
+      "I built a [result] in [short timeframe]. Here's exactly how.",
+      "Stop building from scratch. This template does [X] for you.",
+      "Your landing page is losing you [money/users]. Fix it in [time].",
+      "This is what [X] lines of code looks like in [timeframe]."
+    ]
+  },
+  "HezCast": {
+    "tone": "founder_energy",
+    "style": "product_demo",
+    "audience": "founders_creators_agencies",
+    "persona_name": "Lloyd",
+    "persona_photo": "config/personas/hezcast_persona.jpg",
+    "voice_model": "config/voices/hezcast.onnx",
+    "voice_speed": 1.05,
+    "subtitle_color": "#00D4FF",
+    "subtitle_style": "bold_centered_word_level",
+    "hook_variants": 5,
+    "video_duration_target": 25,
+    "cta": "Try HezCast free \u2192 cast.tinlance.com",
+    "brand_colors": [
+      "#00D4FF",
+      "#0A0E1A"
+    ],
+    "clip_emotion_tags": [
+      "technology",
+      "creator",
+      "automation",
+      "video",
+      "AI",
+      "startup"
+    ],
+    "script_style_notes": "Founder-to-founder energy. Show the product working. Lead with the result. Use specific numbers. Fast, confident, direct.",
+    "hook_patterns": [
+      "I generated 30 videos for 3 brands in one afternoon. Here's how.",
+      "This is what AI content infrastructure looks like in 2026.",
+      "Stop making videos manually. This changes everything.",
+      "POV: Your content engine just became autonomous.",
+      "We built the tool that builds our marketing. Let me show you."
+    ]
+  }
+}

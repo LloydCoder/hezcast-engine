@@ -1,0 +1,74 @@
+# ── Secrets (NEVER commit) ─────────────────────────────
+.env
+.env.local
+.env.production
+*.pem
+*.key
+*.p12
+
+# ── Python ────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# ── Virtual Environments ───────────────────────────────
+venv/
+.venv/
+env/
+ENV/
+
+# ── Models (large files — use git-lfs or download script) ──
+models/musetalk/*.pth
+models/musetalk/*.pt
+models/sadtalker/*.pth
+models/sadtalker/*.pt
+models/whisper/*.bin
+models/piper/*.onnx
+models/piper/*.onnx.json
+
+# ── Storage (generated content — not for git) ──────────
+storage/inputs/*
+storage/clips/*
+storage/outputs/*
+storage/clip_index/*
+!storage/inputs/.gitkeep
+!storage/clips/.gitkeep
+!storage/outputs/.gitkeep
+!storage/clip_index/.gitkeep
+
+# ── Config secrets ─────────────────────────────────────
+config/personas/*.jpg
+config/personas/*.png
+config/voices/*.onnx
+
+# ── Docker volumes ─────────────────────────────────────
+.docker/
+
+# ── IDE ────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ── Logs ──────────────────────────────────────────────
+*.log
+logs/
+
+# ── Temporary files ────────────────────────────────────
+tmp/
+temp/
+*.tmp
