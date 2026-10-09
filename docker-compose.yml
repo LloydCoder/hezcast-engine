@@ -178,6 +178,31 @@ services:
     profiles:
       - dev    # Only starts with: docker-compose --profile dev up
 
+  hezcast-beat:
+    container_name: hezcast-beat
+    build:
+      context: .
+      dockerfile: Dockerfile.worker
+    command: celery -A workers.celery_app beat --loglevel=info --schedule=/tmp/celerybeat-schedule
+    environment:
+      - REDIS_URL=redis://hezcast-redis:6379/0
+      - DATABASE_URL=${DATABASE_URL}
+      - B2_KEY_ID=${B2_KEY_ID}
+      - B2_APP_KEY=${B2_APP_KEY}
+      - B2_BUCKET_NAME=${B2_BUCKET_NAME}
+      - B2_BACKUP_BUCKET=${B2_BACKUP_BUCKET:-hezcast-backups}
+      - DB_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - ./storage:/app/storage
+    depends_on:
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - hezcast-network
+
 # ─────────────────────────────────────────
 # VOLUMES
 # ─────────────────────────────────────────
@@ -192,26 +217,6 @@ volumes:
 # ─────────────────────────────────────────
 # NETWORKS
 # ─────────────────────────────────────────
-  hezcast-beat:
-    container_name: hezcast-beat
-    build: .
-    command: celery -A workers.celery_app beat --loglevel=info --schedule=/tmp/celerybeat-schedule
-    environment:
-      - REDIS_URL=redis://hezcast-redis:6379/0
-      - DATABASE_URL=${DATABASE_URL}
-      - B2_KEY_ID=${B2_KEY_ID}
-      - B2_APP_KEY=${B2_APP_KEY}
-      - B2_BUCKET_NAME=${B2_BUCKET_NAME}
-      - B2_BACKUP_BUCKET=${B2_BACKUP_BUCKET:-hezcast-backups}
-      - DB_PASSWORD=${DB_PASSWORD}
-    volumes:
-      - ./storage:/app/storage
-    depends_on:
-      - hezcast-redis
-    restart: unless-stopped
-    networks:
-      - hezcast-network
-
 networks:
   default:
     name: hezcast-network
