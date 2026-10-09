@@ -14,7 +14,7 @@
 #   - Telegram webhook registration (optional)
 #
 # Usage:
-#   curl -sSL https://raw.githubusercontent.com/Tinlance/hezcast-engine/main/setup.sh | bash
+#   curl -sSL https://raw.githubusercontent.com/LloydCoder/hezcast-engine/main/setup.sh | bash
 #
 # Or locally:
 #   chmod +x setup.sh && ./setup.sh
@@ -31,7 +31,7 @@ WHITE='\033[1;37m'
 RESET='\033[0m'
 
 # ── Config ─────────────────────────────────────────────────────
-REPO="https://github.com/Tinlance/hezcast-engine.git"
+REPO="https://github.com/LloydCoder/hezcast-engine.git"
 INSTALL_DIR="${HOME}/hezcast-engine"
 API_PORT="8503"
 PIPER_VERSION="2023.11.14-2"
