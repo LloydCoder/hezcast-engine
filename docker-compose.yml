@@ -185,7 +185,7 @@ services:
       dockerfile: Dockerfile.worker
     command: celery -A workers.celery_app beat --loglevel=info --schedule=/tmp/celerybeat-schedule
     environment:
-      - REDIS_URL=redis://hezcast-redis:6379/0
+      - REDIS_URL=redis://redis:6379/0
       - DATABASE_URL=${DATABASE_URL}
       - B2_KEY_ID=${B2_KEY_ID}
       - B2_APP_KEY=${B2_APP_KEY}
@@ -200,9 +200,7 @@ services:
       db:
         condition: service_healthy
     restart: unless-stopped
-    networks:
-      - hezcast-network
-
+    
 # ─────────────────────────────────────────
 # VOLUMES
 # ─────────────────────────────────────────
