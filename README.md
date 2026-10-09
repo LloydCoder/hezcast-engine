@@ -52,7 +52,7 @@ It generates, packages, and distributes short-form video content across platform
 ## Quick Start
 
 ```bash
-git clone https://github.com/Tinlance/hezcast-engine.git
+git clone https://github.com/LloydCoder/hezcast-engine.git
 cd hezcast-engine
 cp .env.example .env
 # Add CLAUDE_API_KEY and PEXELS_API_KEY
@@ -109,8 +109,8 @@ curl -X POST http://localhost:8503/generate \
 ## Tests
 
 ```bash
-pytest tests/ -v        # 287 tests — all green
-pytest tests/ --cov     # coverage report
+pytest tests/ -v        # 579 tests — verified in CI
+pytest tests/ --cov     # coverage report (CI baseline: 71% on Python 3.11)
 ```
 
 ---
