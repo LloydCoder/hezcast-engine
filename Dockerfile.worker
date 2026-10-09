@@ -6,7 +6,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-      ffmpeg espeak-ng libespeak-ng1 libglib2.0-0 libgl1 libgomp1 \
+      curl ffmpeg espeak-ng libespeak-ng1 libglib2.0-0 libgl1 libgomp1 \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
