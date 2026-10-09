@@ -1,0 +1,75 @@
+name: HezCast Engine CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hezcast-engine-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Python ${{ matrix.python-version }} tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11"]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - name: Install system media dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends ffmpeg
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+      - name: Verify dependency consistency
+        run: python -m pip check
+      - name: Compile source
+        run: python -m compileall -q api core database deploy utils workers
+      - name: Validate deployment manifests
+        env:
+          DB_PASSWORD: ci-only-not-a-secret
+          DATABASE_URL: postgresql://hezcast:ci-only-not-a-secret@localhost:5432/hezcast
+          CLAUDE_API_KEY: ci-placeholder
+          OPENAI_API_KEY: ci-placeholder
+          PEXELS_API_KEY: ci-placeholder
+          B2_KEY_ID: ci-placeholder
+          B2_APP_KEY: ci-placeholder
+          B2_BUCKET_NAME: ci-placeholder
+        run: |
+          test -f Dockerfile.api
+          test -f Dockerfile.worker
+          test -f Dockerfile.avatar
+          docker compose -f docker-compose.yml config --quiet
+      - name: Build deployment images
+        run: docker compose -f docker-compose.yml build api worker avatar-worker hezcast-beat
+      - name: Run test suite with coverage
+        env:
+          ENVIRONMENT: test
+          ADMIN_API_KEY: ci-test-only-not-a-secret
+        run: python -m pytest tests/ -q --cov=api --cov=core --cov=database --cov=deploy --cov=utils --cov=workers --cov-report=term-missing --cov-report=xml
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: engine-coverage-python-${{ matrix.python-version }}
+          path: coverage.xml
+          if-no-files-found: ignore
