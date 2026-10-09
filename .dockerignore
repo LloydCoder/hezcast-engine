@@ -1,0 +1,34 @@
+# Never bake credentials or local runtime state into images.
+.git
+.github
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+
+# Python build/runtime artifacts
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# Local development and generated media/models
+storage/inputs/*
+storage/clips/*
+storage/outputs/*
+storage/clip_index/*
+models/
+tmp/
+temp/
+*.log
+
+# Tests and repository-only documentation are not required at runtime.
+tests/
+docs/
