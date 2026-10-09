@@ -60,7 +60,7 @@ jobs:
           test -f Dockerfile.avatar
           docker compose -f docker-compose.yml config --quiet
       - name: Build deployment images
-        run: docker compose -f docker-compose.yml build --parallel api worker avatar-worker hezcast-beat
+        run: docker compose -f docker-compose.yml build api worker avatar-worker hezcast-beat
       - name: Run test suite with coverage
         env:
           ENVIRONMENT: test
